@@ -29,7 +29,7 @@ export default class XYRecycleSectionHeader extends Component {
         <View style={[styles.container]}>
           <View style={[styles.separator]}></View>
           <View style={[styles.content]}>
-            <Image resizeMode={'cover'} style={[styles.content_icon]} source={require('../../../res/images/Recycle/huishou_remen@2x.png')}/>
+            <Image resizeMode={'cover'} style={[styles.content_icon]} source={require('../../../res/images/Recycle/huishou_remen.png')}/>
             <Text style={styles.content_text_desc}>热门回收机型</Text>
           </View>
         </View>

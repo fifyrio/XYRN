@@ -31,10 +31,10 @@ export default class XYRecycleTopView extends Component {
           <View style={[styles.header_top_wrap, ]}>
             <Image resizeMode={'cover'} style={[styles.header_top_wrap_bg]} source={require('../../../res/images/Recycle/huishoutop_bg.png')}/>
             <View style={[styles.header_top_content]}>
-              <Image style={styles.header_top_content_img} source={require('../../../res/images/Recycle/huishoutop@2x.png')}/>
+              <Image style={styles.header_top_content_img} source={require('../../../res/images/Recycle/huishoutop.png')}/>
               <View style={[styles.header_top_content_text]}>
                 <Text style={styles.header_top_content_text_desc}>已回收</Text>
-                <Text style={styles.header_top_content_text_num}>1024</Text>
+                <Text style={styles.header_top_content_text_num}>{this.props.rowData}</Text>
                 <Text style={styles.header_top_content_text_desc}>台设备</Text>
               </View>
               <TouchableOpacity style={styles.header_top_content_btn}><Text style={[styles.header_top_content_btn_text]}>查看本机估价</Text></TouchableOpacity>

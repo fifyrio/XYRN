@@ -12,7 +12,7 @@ import {
   ScrollView,
   FlatList,
   ListView,
-  SectionList,
+  RefreshControl,
 } from 'react-native';
 
 'use strict';
@@ -31,6 +31,11 @@ let food = [
   {name: "Potato", category: "Vegetable"}
 ];
 
+let testData = {
+  '0':[1],
+  '1':[1,2,4,5,6],
+};
+
 export default class XYRecycle extends Component{
   constructor(props){
     super(props);
@@ -40,30 +45,75 @@ export default class XYRecycle extends Component{
       sectionHeaderHasChanged: (s1, s2) => s1 !== s2
     });
 
-    this.state={
-      result:'',
-      dataSource:ds.cloneWithRowsAndSections(this.convertFoodArrayToMap()),
+    this.state= {
+      result: '',
+      dataSource: ds,
+      dataObj: {
+        '0':[],
+        '1':[],
+      },
+      isLoading: true,
     };
+
+    this.onLoad();
+  };
+
+
+  loadHotModels(){
+    let url = 'https://userapi.hiweixiu.com/shr/get-hot-device',
+        params = new Map();
+    params.set('version', '2.5.1');
+    XYHttpService.request('GET',url,params,false)
+        .then(result=>{
+          let data = this.formatDataSource('1',result);
+          this.setState({
+            dataSource:this.state.dataSource.cloneWithRowsAndSections(data),
+            isLoading:false,
+          })
+        })
+        .catch(error=>{
+          console.log(error);
+        });
   }
 
-  convertFoodArrayToMap(){
-    let foodCategoryMap = {}; // Create the blank map
-    food.forEach(function(foodItem) {
-      if (!foodCategoryMap[foodItem.category]) {
-        // Create an entry in the map for the category if it hasn't yet been created
-        foodCategoryMap[foodItem.category] = [];
-      }
-
-      foodCategoryMap[foodItem.category].push(foodItem);
-
-    });
-
-    return foodCategoryMap;
+  loadRecycleSum(){
+    let url = 'https://userapi.hiweixiu.com/shr/get-shr-order-counts',
+        params = new Map();
+    params.set('version', '2.5.1');
+    XYHttpService.request('GET',url,params,false)
+        .then(result=>{
+          let data = this.formatDataSource('0',result);
+          this.setState({
+            dataSource:this.state.dataSource.cloneWithRowsAndSections(data),
+          })
+        })
+        .catch(error=>{
+          console.log(error);
+        });
   }
+
+  //加载数据
+  onLoad(){
+    this.loadRecycleSum();
+    this.loadHotModels();
+  }
+
+  formatDataSource(sectionID,result){
+    if (sectionID === '0'){
+      this.state.dataObj['0'] = [result.data];
+    }else {
+      this.state.dataObj['1'] = result.data;
+    }
+    return this.state.dataObj;
+  }
+
+  componentDidMount(){
+    this.onLoad();
+  };
 
   //返回section的方法
-  _renderSectionHeader(section){
-    if (section.key === 0){
+  _renderSectionHeader(sectionData, sectionID){
+    if (sectionID === '0'){
       return (<View></View>)
     }else {
       return(
@@ -72,63 +122,34 @@ export default class XYRecycle extends Component{
     }
   };
 
-  _renderSeparator(){
-    return <View style={styles.line}>
-    </View>
-  };
-
   //返回cell的方法
-  _renderRow(item){
-    if (item.section === 0){
+  _renderRow(rowData, sectionID, rowID){
+    if (sectionID === '0'){
       return(
-          <XYRecycleTopView/>
+          <XYRecycleTopView rowData={rowData}/>
       )
     }else {
       return(
-          <XYRecycleSectionRow/>
+          <XYRecycleSectionRow rowData={rowData}/>
       )
     }
-  };
-
-  //加载数据
-  loadData(){
-    let url = 'https://userapi.hiweixiu.com/shr/get-hot-device',
-        params = new Map();
-    params.set('version', '2.5.1');
-    XYHttpService.request('GET',url,params,false)
-        .then(result=>{
-          this.setState({
-            result: result,
-          })
-        })
-        .catch(error=>{
-          console.log(error);
-        });
-  }
-
-  componentDidMount(){
-    this.loadData();
   };
 
   render(){
     return(
         <View style={styles.container}>
-          <SectionList
-              contentContainerStyle={styles.listViewStyle}
-              renderItem={
-                ({item}) => <View><Text>row</Text></View>
-              }
-              renderSectionHeader={
-                ({section}) => <View><Text>section</Text></View>
-              }
-              sections={
-                [ // 不同section渲染相同类型的子组件
-                  {data: [{key: 'Will', row: 0, section: 0}], title: 'title1', key:0},
-                  {data: [{key: 'Will', row: 0, section: 1}, {key: 'Javion', row: 1, section: 1}, {key: 'Cater', row: 2, section: 1}], title: 'title2', key:1},
-                ]
-              }
-              // dataSource={this.state.dataSource}
+          <ListView
+              renderRow={(rowData, sectionID, rowID) => this._renderRow(rowData, sectionID, rowID)}
+              renderSectionHeader={(sectionData, sectionID) => this._renderSectionHeader(sectionData, sectionID)}
+              dataSource={this.state.dataSource}
               stickySectionHeadersEnabled={false}
+              contentContainerStyle={styles.listViewStyle}
+              refreshControl={
+                <RefreshControl
+                    refreshing={this.state.isLoading}
+                    onRefresh={()=> this.onLoad()}
+                />
+              }
           />
         </View>
     )
@@ -141,6 +162,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    marginBottom: 50,
   },
 
   listViewStyle:{

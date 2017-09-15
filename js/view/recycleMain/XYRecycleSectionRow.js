@@ -24,9 +24,13 @@ export default class XYRecycleSectionRow extends Component {
         <View style={[styles.container]}>
           <View style={[styles.line_h]}></View>
           <View style={[styles.line_v]}></View>
-          <Image resizeMode={'cover'} style={[styles.content_image]} source={require('../../../res/images/Recycle/MouldPlaceHolder.png')}/>
-          <Text style={[styles.content_mould]}>iPhone6s</Text>
-          <Text style={[styles.content_price]}>回收均价 ￥100</Text>
+          <Image resizeMode={'cover'} style={[styles.content_image]} source={{uri: this.props.rowData.mould_picture}}/>
+          <Text style={[styles.content_mould]}>{this.props.rowData.mould_name}</Text>
+          <View style={[styles.content_price]}>
+            <Text style={[styles.content_price_left]}>回收均价 </Text>
+            <Text style={[styles.content_price_right]}>￥{this.props.rowData.avg_price}</Text>
+          </View>
+
         </View>
     )
   }
@@ -86,12 +90,21 @@ const styles = StyleSheet.create({
   content_price: {
     height: 16,
     width: win.width / 2 - 20,
-    textAlign: 'center',
     marginTop: 10,
+    marginBottom: 26,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+
+  content_price_left: {
+    lineHeight: 16,
+    fontSize: 11,
+    color: '#999999',
+  },
+  content_price_right: {
     lineHeight: 16,
     fontSize: 13,
-    color: '#333333',
-    fontWeight: 'bold',
-    marginBottom: 26,
+    color: '#ff5000',
   },
+
 });

@@ -46,10 +46,10 @@ export default class XYHttpService{
       )
           .then(response=>response.json())
           .then(result=>{
-            resolve(JSON.stringify(result))
+            resolve(result)
           })
           .catch(error=>{
-            reject(JSON.stringify(error))
+            reject(error)
           })
     })
   }
